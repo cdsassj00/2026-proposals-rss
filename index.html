@@ -3,492 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 전문인재 기획서 대시보드</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Fuse.js for lightweight local search -->
+    <title>기획서 인사이트 봇 (ChatGPT 스타일)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --glass-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-hover: #60a5fa;
-            --accent-glow: rgba(59, 130, 246, 0.5);
-            --card-hover: rgba(51, 65, 85, 0.8);
+            --bg-color: #343541; /* ChatGPT dark background */
+            --msg-user: #343541;
+            --msg-bot: #444654;
+            --text-main: #ececf1;
+            --accent: #10a37f; /* ChatGPT green */
         }
-
+        
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
-                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
-            background-attachment: fixed;
+            font-family: 'Inter', -apple-system, sans-serif;
             display: flex;
+            flex-direction: column;
             height: 100vh;
             overflow: hidden;
         }
-
-        /* Sidebar styling */
-        .sidebar {
-            width: 320px;
-            background: var(--glass-bg);
-            border-right: 1px solid var(--glass-border);
-            backdrop-filter: blur(12px);
+        
+        /* Navbar */
+        .navbar {
+            padding: 12px 24px;
+            background: #202123;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
-            flex-direction: column;
-            height: 100%;
-            z-index: 10;
+            justify-content: space-between;
+            align-items: center;
         }
-
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--glass-border);
+        .navbar h1 {
+            margin: 0; font-size: 1rem; font-weight: 600;
         }
-
-        .sidebar-header h1 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #60a5fa, #a78bfa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .sidebar-header p {
-            margin: 8px 0 0 0;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .item-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-        }
-
-        .list-item {
-            padding: 16px;
-            margin-bottom: 8px;
+        .insight-badge {
+            font-size: 0.75rem;
+            background: rgba(16, 163, 127, 0.2);
+            color: #10a37f;
+            padding: 4px 10px;
             border-radius: 12px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
+            border: 1px solid rgba(16, 163, 127, 0.5);
         }
 
-        .list-item:hover {
-            background: var(--card-hover);
-        }
-
-        .list-item.active {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
-        }
-
-        .list-item-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-        }
-
-        .list-item-org {
-            font-size: 0.8rem;
-            color: var(--accent-hover);
-        }
-
-        /* Main content area styling */
-        .main-content {
+        /* Chat Container */
+        .chat-container {
             flex: 1;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            padding: 40px;
-            position: relative;
         }
 
-        .content-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 32px;
-            backdrop-filter: blur(12px);
-            max-width: 900px;
-            margin: 0 auto;
-            width: 100%;
-            display: none;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: fadeIn 0.4s ease forwards;
+        .message-row {
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease;
         }
-
+        
+        .message-row.bot {
+            background-color: var(--msg-bot);
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .content-card.active {
-            display: block;
+        .message-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            padding: 0 24px;
+            line-height: 1.6;
         }
 
-        .content-header {
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .content-header h2 {
-            margin: 0 0 8px 0;
-            font-size: 1.8rem;
-        }
-
-        .content-header a {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            transition: color 0.2s;
-        }
-
-        .content-header a:hover {
-            color: var(--accent-hover);
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
-
-        /* Section Styling */
-        .section {
-            margin-bottom: 32px;
-            background: rgba(15, 23, 42, 0.4);
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .section h3 {
-            margin: 0 0 16px 0;
-            font-size: 1.1rem;
-            color: #a78bfa;
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
         }
+        .avatar.user { background: #5436DA; }
+        .avatar.bot { background: var(--accent); }
 
-        .section h3::before {
-            content: '';
-            display: block;
-            width: 4px;
-            height: 16px;
-            background: var(--accent);
-            border-radius: 2px;
-        }
-
-        .section-content {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: #cbd5e1;
+        .text-content {
+            flex: 1;
+            font-size: 1rem;
             white-space: pre-wrap;
         }
 
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--text-muted);
-            text-align: center;
-        }
-
-        .empty-state h2 {
-            font-size: 1.5rem;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Loader */
-        .loader {
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Chatbot UI */
-        .chat-widget {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .chat-toggle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chat-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        .chat-window {
-            width: 380px;
-            height: 550px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            backdrop-filter: blur(16px);
-            margin-bottom: 20px;
-            display: none;
-            flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            overflow: hidden;
-            transform-origin: bottom right;
-            animation: chatOpen 0.3s ease;
-        }
-
-        .chat-window.open {
-            display: flex;
-        }
-
-        .chat-header {
-            padding: 16px 20px;
-            background: rgba(15, 23, 42, 0.6);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-header h3 {
-            margin: 0;
-            font-size: 1rem;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .chat-header h3 span {
-            font-size: 0.75rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .chat-body {
-            flex: 1;
+        /* Extracted Section Styling */
+        .extracted-section {
+            background: rgba(0,0,0,0.2);
             padding: 20px;
-            overflow-y: auto;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            margin-top: 15px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            color: #d1d5db;
+        }
+
+        /* Input Area */
+        .input-wrapper {
+            position: relative;
+            background-image: linear-gradient(180deg, rgba(53,55,64,0), #343541 40%);
+            padding: 24px;
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .input-box {
             display: flex;
-            flex-direction: column;
-            gap: 16px;
+            align-items: center;
+            background: #40414f;
+            border: 1px solid rgba(32,33,35,0.5);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
-        .chat-msg {
-            max-width: 85%;
-            padding: 12px 16px;
-            border-radius: 16px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            word-break: break-word;
-        }
-
-        .msg-bot {
-            align-self: flex-start;
-            background: rgba(51, 65, 85, 0.6);
-            border-bottom-left-radius: 4px;
-            color: #cbd5e1;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .msg-user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(96, 165, 250, 0.8));
-            border-bottom-right-radius: 4px;
-            color: #fff;
-        }
-
-        .chat-footer {
-            padding: 16px;
-            background: rgba(15, 23, 42, 0.4);
-            border-top: 1px solid var(--glass-border);
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-input {
+        .input-box input {
             flex: 1;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 10px 16px;
-            color: #fff;
-            font-family: inherit;
+            background: transparent;
+            border: none;
+            padding: 16px 20px;
+            color: white;
+            font-size: 1rem;
             outline: none;
+            font-family: inherit;
         }
 
-        .chat-input:focus {
-            border-color: rgba(59, 130, 246, 0.5);
-            background: rgba(255,255,255,0.1);
-        }
-
-        .chat-send {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .input-box button {
             background: var(--accent);
             border: none;
             color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .chat-send:hover {
-            background: var(--accent-hover);
-        }
-
-        .action-link {
-            color: #60a5fa;
-            text-decoration: underline;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-block;
-            margin-top: 8px;
-        }
-        
-        .insight-tag {
-            font-size:0.75rem; 
-            color:#94a3b8; 
-            display:block; 
-            margin-bottom:8px;
-            background: rgba(0,0,0,0.2);
-            padding: 6px 10px;
             border-radius: 6px;
-            border-left: 3px solid #8b5cf6;
+            padding: 8px 12px;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
+
+        .input-box button:hover {
+            opacity: 0.8;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 12px;
+        }
+
+        /* Loader */
+        .typing-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #565869; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h1>2026 AX 과제기획서</h1>
-            <p id="total-count">데이터 불러오는 중...</p>
-        </div>
-        <div class="item-list" id="item-list">
-            <div class="loader" id="list-loader"></div>
-        </div>
+    <div class="navbar">
+        <h1>2026 AX 과제기획서 인사이트 봇</h1>
+        <div class="insight-badge">LLM-Free (Eco Mode)</div>
     </div>
 
-    <div class="main-content">
-        <div class="empty-state" id="empty-state">
-            <h2>기획서 대시보드</h2>
-            <p>좌측 목록에서 지원자를 선택하거나,<br>우측 하단 챗봇에게 물어보세요!</p>
-        </div>
-        
-        <div class="content-card" id="content-card">
-            <div class="content-header">
-                <h2 id="detail-title">제목</h2>
-                <a id="detail-link" href="#" target="_blank">원본 마크다운 파일 보기 →</a>
-            </div>
-            
-            <div id="detail-sections">
-                <!-- Sections will be injected here -->
+    <div class="chat-container" id="chat-container">
+        <!-- Initial Greeting -->
+        <div class="message-row bot">
+            <div class="message-content">
+                <div class="avatar bot">🤖</div>
+                <div class="text-content">안녕하세요! 2026 AI·데이터 분석 전문인재 기획서 데이터를 모두 읽어두었습니다.
+궁금한 후보자의 이름과 알고 싶은 항목을 말씀해주세요.
+
+💡 <b>예시 질문:</b>
+- "최철운님의 지원동기에 대해 알려줘"
+- "김병학 기획서 보여줘"
+- "홍길동의 경력은 뭐야?"
+
+<span style="color:#94a3b8; font-size:0.85rem; display:block; margin-top:10px;">(※ 이 페이지는 무거운 React 백엔드나 LLM API 없이, 브라우저의 기본 기능과 로컬 검색(Fuse.js)만으로 ChatGPT의 응답을 가볍게 흉내냅니다. 오버엔지니어링을 피하는 훌륭한 예시입니다!)</span></div>
             </div>
         </div>
     </div>
 
-    <!-- Chatbot Widget -->
-    <div class="chat-widget">
-        <div class="chat-window" id="chat-window">
-            <div class="chat-header">
-                <h3>🤖 인사이트 봇 <span>Eco-friendly</span></h3>
-                <button onclick="toggleChat()" style="background:none;border:none;color:white;cursor:pointer;">✕</button>
+    <div class="input-wrapper">
+        <div class="input-container">
+            <div class="input-box">
+                <input type="text" id="chat-input" placeholder="질문을 입력하세요..." onkeypress="if(event.key === 'Enter') handleChat()">
+                <button onclick="handleChat()">➤</button>
             </div>
-            <div class="chat-body" id="chat-body">
-                <div class="chat-msg msg-bot">
-                    안녕하세요! 무엇이든 물어보세요.<br>
-                    <span class="insight-tag">💡 LLM API 없이, 브라우저 내부의 가벼운 검색 알고리즘(Fuse.js)만으로 동작하는 친환경 챗봇입니다.</span>
-                    <i>"홍길동은 무슨 과제를 했어?"</i> 처럼 자연스럽게 물어보세요!
-                </div>
-            </div>
-            <div class="chat-footer">
-                <input type="text" class="chat-input" id="chat-input" placeholder="이름이나 키워드를 검색해보세요..." onkeypress="if(event.key === 'Enter') handleChat()">
-                <button class="chat-send" onclick="handleChat()">➤</button>
+            <div class="footer-text">
+                Free Research Preview. 이 시스템은 정규표현식과 Fuse.js를 기반으로 동작합니다.
             </div>
         </div>
-        <button class="chat-toggle" onclick="toggleChat()">💬</button>
     </div>
 
     <script>
         let allItemsData = [];
-        let fuse;
+        let nameFuse;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Fetch RSS feed
+                // Fetch RSS feed automatically on load
                 const response = await fetch('rss.xml');
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(text, "text/xml");
                 
                 const items = Array.from(xmlDoc.querySelectorAll('item'));
-                document.getElementById('list-loader').style.display = 'none';
-                document.getElementById('total-count').textContent = `총 ${items.length}명의 후보자`;
-                
-                const listContainer = document.getElementById('item-list');
                 
                 items.forEach((item, index) => {
-                    const title = item.querySelector('title')?.textContent || '제목 없음';
-                    const link = item.querySelector('link')?.textContent || '#';
+                    const title = item.querySelector('title')?.textContent || '';
+                    const link = item.querySelector('link')?.textContent || '';
                     
                     const tags = {
                         motivation: item.querySelector('motivation')?.textContent || '',
@@ -506,183 +256,125 @@
                         name = match[2].trim();
                     }
 
-                    // Save for Search
                     allItemsData.push({
-                        id: `item_${index}`,
-                        title: title,
                         name: name,
                         org: org,
-                        motivation: tags.motivation,
-                        experience: tags.experience,
-                        plan: tags.plan,
-                        project_proposal: tags.project_proposal,
-                        leadership_plan: tags.leadership_plan,
-                        link: link,
-                        tags: tags
+                        tags: tags,
+                        link: link
                     });
-
-                    // Create list element
-                    const li = document.createElement('div');
-                    li.className = 'list-item';
-                    li.id = `list-item-${index}`;
-                    li.innerHTML = `
-                        <div class="list-item-title">${name}</div>
-                        <div class="list-item-org">${org}</div>
-                    `;
-                    
-                    li.addEventListener('click', () => {
-                        openProfile(index);
-                    });
-                    
-                    listContainer.appendChild(li);
                 });
 
-                // Initialize Fuse.js for Search
-                const options = {
-                    includeScore: true,
-                    threshold: 0.4, // Lower is more strict
-                    ignoreLocation: true,
-                    keys: [
-                        { name: 'name', weight: 0.6 },
-                        { name: 'org', weight: 0.2 },
-                        { name: 'project_proposal', weight: 0.1 },
-                        { name: 'experience', weight: 0.1 }
-                    ]
-                };
-                fuse = new Fuse(allItemsData, options);
+                // Initialize strict Name search
+                nameFuse = new Fuse(allItemsData, { 
+                    keys: ['name'], 
+                    threshold: 0.3 // Strict match for names
+                });
                 
             } catch (error) {
                 console.error("Error loading RSS:", error);
-                document.getElementById('total-count').textContent = "데이터를 불러오는데 실패했습니다.";
-                document.getElementById('list-loader').style.display = 'none';
+                addMessage("데이터를 불러오는데 실패했습니다.", false);
             }
         });
 
-        // Toggle Chat Window
-        function toggleChat() {
-            const chatWin = document.getElementById('chat-window');
-            chatWin.classList.toggle('open');
-            if(chatWin.classList.contains('open')) {
-                document.getElementById('chat-input').focus();
-            }
+        function addMessage(text, isUser = false) {
+            const container = document.getElementById('chat-container');
+            const row = document.createElement('div');
+            row.className = 'message-row ' + (isUser ? 'user' : 'bot');
+            
+            row.innerHTML = `
+                <div class="message-content">
+                    <div class="avatar ${isUser ? 'user' : 'bot'}">${isUser ? '👤' : '🤖'}</div>
+                    <div class="text-content">${text}</div>
+                </div>
+            `;
+            
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+            return row;
         }
 
-        function addChatMessage(text, isUser = false) {
-            const body = document.getElementById('chat-body');
-            const msg = document.createElement('div');
-            msg.className = 'chat-msg ' + (isUser ? 'msg-user' : 'msg-bot');
-            msg.innerHTML = text; 
-            body.appendChild(msg);
-            body.scrollTop = body.scrollHeight;
+        function addTypingIndicator() {
+            return addMessage('<div class="typing-indicator"></div>', false);
         }
 
-        // Handle Chatbot Search Logic
         function handleChat() {
             const input = document.getElementById('chat-input');
             const query = input.value.trim();
             if(!query) return;
             
-            addChatMessage(query, true);
+            addMessage(escapeHTML(query), true);
             input.value = '';
             
+            const typingRow = addTypingIndicator();
+            
             setTimeout(() => {
-                // Natural Language "Fake" parsing by removing stop words
-                const stopWords = ["은", "는", "이", "가", "어떤", "무슨", "일을", "했어", "알려줘", "뭐야", "뭐해", "과제", "기획서", "보여줘", "누구야"];
-                let cleanQuery = query;
-                stopWords.forEach(w => {
-                    cleanQuery = cleanQuery.replace(new RegExp(w, 'g'), ' ');
-                });
-                cleanQuery = cleanQuery.trim();
-                if(cleanQuery === '') cleanQuery = query;
+                typingRow.remove();
                 
-                const results = fuse.search(cleanQuery);
-                
-                if(results.length > 0) {
-                    const bestMatch = results[0].item;
-                    const index = allItemsData.findIndex(d => d.id === bestMatch.id);
-                    
-                    let response = `<b>${bestMatch.name}</b>(${bestMatch.org}) 님의 정보가 가장 매칭됩니다!<br>`;
-                    
-                    // Add an insight message rarely or conditionally to emphasize the point
-                    if(Math.random() > 0.5) {
-                        response += `<span class="insight-tag">💡 무거운 백엔드 LLM 없이, 브라우저 단에서 정규식과 로컬 검색(Fuse.js)만으로도 훌륭한 응답을 흉내낼 수 있습니다. "오버엔지니어링"을 피하는 것이 진정한 실력 아닐까요? 😉</span>`;
-                    }
+                // 1. Detect Intent (Section)
+                let intent = null;
+                let sectionName = "";
+                if (query.match(/동기|지원/)) { intent = "motivation"; sectionName = "지원동기"; }
+                else if (query.match(/경력|실적|경험|이력/)) { intent = "experience"; sectionName = "AI·데이터분석 활용 경력 및 실적"; }
+                else if (query.match(/기획서|실전|과제|프로젝트/)) { intent = "project_proposal"; sectionName = "실전 AX 과제 기획서"; }
+                else if (query.match(/리더|활동/)) { intent = "leadership_plan"; sectionName = "AI·데이터 거점리더 활동계획"; }
+                else if (query.match(/계획|활용/)) { intent = "plan"; sectionName = "데이터 분석·AI활용 계획"; }
+                else if (query.match(/전부|모두|다 알려|전체/)) { intent = "all"; }
 
-                    // Extract a snippet from project proposal
-                    let snippet = bestMatch.project_proposal.substring(0, 80).replace(/#/g, '').replace(/\n/g, ' ').trim();
-                    if(snippet) {
-                        response += `<br><b>주요 기획 내용:</b><br><i>"${snippet}..."</i><br>`;
+                // 2. Detect Person
+                let targetPerson = null;
+                
+                // Direct strict inclusion check first
+                for(let d of allItemsData) {
+                    if(query.includes(d.name)) {
+                        targetPerson = d;
+                        break;
                     }
-                    
-                    response += `<span class="action-link" onclick="openProfile(${index})">👉 상세 내용 화면에 띄우기</span>`;
-                    
-                    addChatMessage(response);
+                }
+                
+                // If not found, try fuzzy match
+                if(!targetPerson && nameFuse) {
+                    const res = nameFuse.search(query);
+                    if(res.length > 0) targetPerson = res[0].item;
+                }
+                
+                // 3. Generate Response
+                if(targetPerson) {
+                    if(intent && intent !== "all") {
+                        const content = targetPerson.tags[intent];
+                        let response = `<b>${targetPerson.name}</b>(${targetPerson.org}) 님의 <b>[${sectionName}]</b> 항목입니다.\n`;
+                        if(content && content.trim()) {
+                            response += `<div class="extracted-section">${escapeHTML(content.replace(/^#+\s+.*?\n/, '').trim())}</div>`;
+                        } else {
+                            response += `\n\n해당 항목의 내용이 비어있거나 작성되지 않았습니다.`;
+                        }
+                        addMessage(response, false);
+                    } 
+                    else if (intent === "all") {
+                        let response = `<b>${targetPerson.name}</b>(${targetPerson.org}) 님의 기획서 전체 항목입니다.\n`;
+                        const sections = [
+                            {id: 'motivation', name: '지원동기'}, 
+                            {id: 'experience', name: '경력 및 실적'}, 
+                            {id: 'plan', name: '활용 계획'}, 
+                            {id: 'project_proposal', name: '과제 기획서'}, 
+                            {id: 'leadership_plan', name: '활동계획'}
+                        ];
+                        
+                        sections.forEach(sec => {
+                            if(targetPerson.tags[sec.id] && targetPerson.tags[sec.id].trim()) {
+                                response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').trim())}</div>`;
+                            }
+                        });
+                        addMessage(response, false);
+                    } 
+                    else {
+                        addMessage(`<b>${targetPerson.name}</b>(${targetPerson.org}) 님에 대해 무엇이 궁금하신가요?\n\n- 지원동기\n- 경력 및 실적\n- 활용 계획\n- 과제 기획서\n- 거점리더 활동계획\n\n(예: "지원동기 알려줘")`, false);
+                    }
                 } else {
-                    addChatMessage(`음... '${query}'와 관련된 지원자를 찾지 못했습니다. 이름이나 소속 기관명을 정확히 입력해 보시겠어요? 🥲<br><span class="insight-tag">💡 로컬 검색의 한계입니다. 맥락 추론이 필요할 때 비로소 진짜 LLM을 꺼내들면 됩니다!</span>`);
+                    addMessage(`해당하는 분의 이름을 찾을 수 없습니다. 정확한 이름을 포함해서 질문해 주시겠어요?\n(예: "최철운 기획서 보여줘")`, false);
                 }
-            }, 500); // 0.5s delay to make it feel like AI typing
+            }, 600); // Fake typing delay
         }
 
-        // Open Profile in Main View
-        window.openProfile = function(index) {
-            // Remove active classes
-            document.querySelectorAll('.list-item').forEach(el => el.classList.remove('active'));
-            
-            // Add active class to selected
-            const activeLi = document.getElementById(`list-item-${index}`);
-            if(activeLi) {
-                activeLi.classList.add('active');
-                activeLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-            
-            const data = allItemsData[index];
-            showDetails(data.title, data.link, data.tags);
-        }
-
-        function showDetails(title, link, tags) {
-            document.getElementById('empty-state').style.display = 'none';
-            const card = document.getElementById('content-card');
-            
-            card.classList.remove('active');
-            void card.offsetWidth; 
-            card.classList.add('active');
-            
-            document.getElementById('detail-title').textContent = title;
-            document.getElementById('detail-link').href = link;
-            
-            const sectionsContainer = document.getElementById('detail-sections');
-            sectionsContainer.innerHTML = ''; 
-            
-            const sectionMap = [
-                { id: 'motivation', label: '1. 지원동기' },
-                { id: 'experience', label: '2. AI·데이터분석 활용 경력 및 실적' },
-                { id: 'plan', label: '3. 데이터 분석·AI활용 계획' },
-                { id: 'project_proposal', label: '4. 실전 AX 과제 기획서' },
-                { id: 'leadership_plan', label: '5. AI·데이터 거점리더 활동계획' }
-            ];
-            
-            sectionMap.forEach(sec => {
-                const content = tags[sec.id];
-                if(content && content.trim().length > 0) {
-                    const sectionEl = document.createElement('div');
-                    sectionEl.className = 'section';
-                    
-                    let cleanContent = content.trim();
-                    cleanContent = cleanContent.replace(/^#+\s+.*?\n/, '');
-                    
-                    sectionEl.innerHTML = `
-                        <h3>${sec.label}</h3>
-                        <div class="section-content">${escapeHTML(cleanContent)}</div>
-                    `;
-                    sectionsContainer.appendChild(sectionEl);
-                }
-            });
-            
-            if(sectionsContainer.innerHTML === '') {
-                sectionsContainer.innerHTML = '<div class="section"><div class="section-content">상세 내용이 파싱되지 않았거나 비어있습니다. 원본 마크다운 파일을 참조해주세요.</div></div>';
-            }
-        }
-        
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({
