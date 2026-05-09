@@ -241,11 +241,11 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Fetch RSS feed automatically on load
-                const response = await fetch('rss.xml');
-                const text = await response.text();
+                // Add timestamp to bypass GitHub Pages/Browser caching
+                const response = await fetch('rss.xml?v=' + new Date().getTime());
+                const xmlText = await response.text();
                 const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
+                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
                 
                 const items = Array.from(xmlDoc.querySelectorAll('item'));
                 
