@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>기획서 인사이트 봇 (ChatGPT 스타일)</title>
+    <title>Who am I (3일 뒤 영구삭제 예정)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <style>
@@ -189,7 +189,7 @@
 <body>
 
     <div class="navbar">
-        <h1>2026 AX 과제기획서 인사이트 봇</h1>
+        <h1>Who am I (3일 뒤 영구삭제 예정)</h1>
         <div class="insight-badge">LLM-Free (Eco Mode)</div>
     </div>
 
@@ -421,6 +421,14 @@
                         if(content && content.trim()) {
                             let cleanContent = content.replace(/^#+\s+.*?\n/, '').replace(/(\r?\n\s*)+/g, '\n').trim();
                             response += `<div class="extracted-section">${escapeHTML(cleanContent).replace(/\n/g, '<br/>')}</div>`;
+                            
+                            const compliments = [
+                                "분석 결과, 높은 경쟁률을 뚫고 선발된 인재답게 뛰어난 통찰력과 잠재력이 돋보입니다! 👏",
+                                "작성하신 내용에서 실무에 대한 깊은 고민과 전문성이 느껴집니다. 매우 우수한 핵심 인재로 평가됩니다! ✨",
+                                "문제를 해결하려는 구체적이고 체계적인 방향성이 훌륭합니다. 향후 과정에서의 눈부신 활약이 기대되는 우수 인재입니다! 🌟"
+                            ];
+                            const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+                            response += `<div style="margin-top: 15px; padding: 12px; background: rgba(16, 163, 127, 0.1); border-left: 3px solid #10a37f; border-radius: 4px; font-weight: 500; color: #ececf1;">💡 <b>AI 평가의견:</b> ${randomCompliment}</div>`;
                         } else {
                             response += `\n\n해당 항목의 내용이 비어있거나 작성되지 않았습니다.`;
                         }
@@ -442,6 +450,15 @@
                                 response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(cleanContent).replace(/\n/g, '<br/>')}</div>`;
                             }
                         });
+                        
+                        const compliments = [
+                            "분석 결과, 높은 경쟁률을 뚫고 선발된 인재답게 뛰어난 통찰력과 잠재력이 돋보입니다! 👏",
+                            "전체적인 기획에서 실무에 대한 깊은 고민과 전문성이 느껴집니다. 매우 우수한 핵심 인재로 평가됩니다! ✨",
+                            "문제를 해결하려는 구체적이고 체계적인 방향성이 훌륭합니다. 향후 과정에서의 눈부신 활약이 기대되는 우수 인재입니다! 🌟"
+                        ];
+                        const randomCompliment = compliments[Math.floor(Math.random() * compliments.length)];
+                        response += `<div style="margin-top: 15px; padding: 12px; background: rgba(16, 163, 127, 0.1); border-left: 3px solid #10a37f; border-radius: 4px; font-weight: 500; color: #ececf1;">💡 <b>AI 종합 평가의견:</b> ${randomCompliment}</div>`;
+                        
                         addMessage(response, false, true);
                     } 
                     else {
