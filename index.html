@@ -214,8 +214,9 @@
     <div class="input-wrapper">
         <div class="input-container">
             <div class="input-box">
-                <input type="text" id="chat-input" placeholder="질문을 입력하세요..." onkeypress="if(event.key === 'Enter') handleChat()">
-                <button onclick="handleChat()">➤</button>
+                <input type="text" id="chat-input" placeholder="누구에 대해 궁금하신가요? (예: 홍길동의 지원동기)" onkeypress="if(event.key === 'Enter') handleChat()">
+                <button id="stop-btn" style="display: none; background: #dc2626;" onclick="stopTyping()">■</button>
+                <button id="send-btn" onclick="handleChat()">➤</button>
             </div>
             <div class="footer-text">
                 Free Research Preview. 이 시스템은 정규표현식과 Fuse.js를 기반으로 동작합니다.
@@ -227,6 +228,16 @@
         let allItemsData = [];
         let nameFuse;
         let currentContextPerson = null; // Context Memory Engine
+        let typingContext = { stop: false, currentTimeout: null };
+
+        function stopTyping() {
+            typingContext.stop = true;
+            if(typingContext.currentTimeout) {
+                clearTimeout(typingContext.currentTimeout);
+            }
+            document.getElementById('stop-btn').style.display = 'none';
+            document.getElementById('send-btn').style.display = 'inline-block';
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -308,7 +319,17 @@
             let text = "";
             const container = document.getElementById('chat-container');
             
+            typingContext.stop = false;
+            document.getElementById('send-btn').style.display = 'none';
+            document.getElementById('stop-btn').style.display = 'inline-block';
+            
             function type() {
+                if (typingContext.stop) {
+                    element.innerHTML = text; // Keep what was typed so far
+                    container.scrollTop = container.scrollHeight;
+                    return;
+                }
+
                 if (i < htmlString.length) {
                     let char = htmlString.charAt(i);
                     if (char === '<') isTag = true;
@@ -325,11 +346,13 @@
                     if (isTag) {
                         type(); 
                     } else {
-                        setTimeout(type, speed + (Math.random() * 10));
+                        typingContext.currentTimeout = setTimeout(type, speed + (Math.random() * 10));
                     }
                 } else {
                     element.innerHTML = text;
                     container.scrollTop = container.scrollHeight;
+                    document.getElementById('stop-btn').style.display = 'none';
+                    document.getElementById('send-btn').style.display = 'inline-block';
                 }
             }
             type();
