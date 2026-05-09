@@ -108,6 +108,7 @@
             margin-bottom: 15px;
             font-size: 0.95rem;
             color: #d1d5db;
+            line-height: 1.4;
         }
 
         /* Input Area */
@@ -363,9 +364,10 @@
                 // 2. Detect Person
                 let targetPerson = null;
                 
-                // Direct strict inclusion check first
+                // Direct strict inclusion check first (ignoring all spaces)
+                let normQuery = query.replace(/\s+/g, '');
                 for(let d of allItemsData) {
-                    if(query.includes(d.name)) {
+                    if(normQuery.includes(d.name.replace(/\s+/g, ''))) {
                         targetPerson = d;
                         break;
                     }
@@ -383,7 +385,7 @@
                         const content = targetPerson.tags[intent];
                         let response = `<b>${targetPerson.name}</b>(${targetPerson.org}) 님의 <b>[${sectionName}]</b> 항목입니다.\n`;
                         if(content && content.trim()) {
-                            let cleanContent = content.replace(/^#+\s+.*?\n/, '').replace(/\n+/g, '\n').trim();
+                            let cleanContent = content.replace(/^#+\s+.*?\n/, '').replace(/(\r?\n\s*)+/g, '\n').trim();
                             response += `<div class="extracted-section">${escapeHTML(cleanContent)}</div>`;
                         } else {
                             response += `\n\n해당 항목의 내용이 비어있거나 작성되지 않았습니다.`;
@@ -402,7 +404,7 @@
                         
                         sections.forEach(sec => {
                             if(targetPerson.tags[sec.id] && targetPerson.tags[sec.id].trim()) {
-                                let cleanContent = targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').replace(/\n+/g, '\n').trim();
+                                let cleanContent = targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').replace(/(\r?\n\s*)+/g, '\n').trim();
                                 response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(cleanContent)}</div>`;
                             }
                         });
