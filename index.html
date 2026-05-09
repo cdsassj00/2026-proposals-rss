@@ -276,7 +276,7 @@
             }
         });
 
-        function addMessage(text, isUser = false) {
+        function addMessage(text, isUser = false, stream = false) {
             const container = document.getElementById('chat-container');
             const row = document.createElement('div');
             row.className = 'message-row ' + (isUser ? 'user' : 'bot');
@@ -284,13 +284,53 @@
             row.innerHTML = `
                 <div class="message-content">
                     <div class="avatar ${isUser ? 'user' : 'bot'}">${isUser ? '👤' : '🤖'}</div>
-                    <div class="text-content">${text}</div>
+                    <div class="text-content"></div>
                 </div>
             `;
             
             container.appendChild(row);
-            container.scrollTop = container.scrollHeight;
+            const contentDiv = row.querySelector('.text-content');
+            
+            if(stream && !isUser) {
+                typeWriterHTML(contentDiv, text, 10);
+            } else {
+                contentDiv.innerHTML = text;
+                container.scrollTop = container.scrollHeight;
+            }
             return row;
+        }
+
+        function typeWriterHTML(element, htmlString, speed = 10) {
+            let i = 0;
+            let isTag = false;
+            let text = "";
+            const container = document.getElementById('chat-container');
+            
+            function type() {
+                if (i < htmlString.length) {
+                    let char = htmlString.charAt(i);
+                    if (char === '<') isTag = true;
+                    
+                    text += char;
+                    if (char === '>') isTag = false;
+                    
+                    element.innerHTML = text + (isTag ? '' : '<span style="color: #10a37f; font-weight: bold;"> ▌</span>');
+                    
+                    if(i % 3 === 0) container.scrollTop = container.scrollHeight;
+                    
+                    i++;
+                    
+                    if (isTag) {
+                        type(); 
+                    } else {
+                        setTimeout(type, speed + (Math.random() * 10));
+                    }
+                } else {
+                    element.innerHTML = text;
+                    container.scrollTop = container.scrollHeight;
+                }
+            }
+            type();
         }
 
         function addTypingIndicator() {
@@ -347,7 +387,7 @@
                         } else {
                             response += `\n\n해당 항목의 내용이 비어있거나 작성되지 않았습니다.`;
                         }
-                        addMessage(response, false);
+                        addMessage(response, false, true);
                     } 
                     else if (intent === "all") {
                         let response = `<b>${targetPerson.name}</b>(${targetPerson.org}) 님의 기획서 전체 항목입니다.\n`;
@@ -364,13 +404,13 @@
                                 response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').trim())}</div>`;
                             }
                         });
-                        addMessage(response, false);
+                        addMessage(response, false, true);
                     } 
                     else {
-                        addMessage(`<b>${targetPerson.name}</b>(${targetPerson.org}) 님에 대해 무엇이 궁금하신가요?\n\n- 지원동기\n- 경력 및 실적\n- 활용 계획\n- 과제 기획서\n- 거점리더 활동계획\n\n(예: "지원동기 알려줘")`, false);
+                        addMessage(`<b>${targetPerson.name}</b>(${targetPerson.org}) 님에 대해 무엇이 궁금하신가요?\n\n- 지원동기\n- 경력 및 실적\n- 활용 계획\n- 과제 기획서\n- 거점리더 활동계획\n\n(예: "지원동기 알려줘")`, false, true);
                     }
                 } else {
-                    addMessage(`해당하는 분의 이름을 찾을 수 없습니다. 정확한 이름을 포함해서 질문해 주시겠어요?\n(예: "최철운 기획서 보여줘")`, false);
+                    addMessage(`해당하는 분의 이름을 찾을 수 없습니다. 정확한 이름을 포함해서 질문해 주시겠어요?\n(예: "최철운 기획서 보여줘")`, false, true);
                 }
             }, 600); // Fake typing delay
         }
