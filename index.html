@@ -226,6 +226,7 @@
     <script>
         let allItemsData = [];
         let nameFuse;
+        let currentContextPerson = null; // Context Memory Engine
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -374,9 +375,19 @@
                 }
                 
                 // If not found, try fuzzy match
-                if(!targetPerson && nameFuse) {
+                if(!targetPerson && nameFuse && normQuery.length > 1) {
                     const res = nameFuse.search(query);
-                    if(res.length > 0) targetPerson = res[0].item;
+                    // Prevent generic intent words from accidentally fuzzy-matching a name
+                    if(res.length > 0 && res[0].score <= 0.2) {
+                        targetPerson = res[0].item;
+                    }
+                }
+                
+                // *** Context Memory Engine ***
+                if (targetPerson) {
+                    currentContextPerson = targetPerson; // Save context for next time
+                } else if (currentContextPerson) {
+                    targetPerson = currentContextPerson; // Retrieve context from memory
                 }
                 
                 // 3. Generate Response
