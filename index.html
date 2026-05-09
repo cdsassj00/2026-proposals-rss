@@ -383,7 +383,8 @@
                         const content = targetPerson.tags[intent];
                         let response = `<b>${targetPerson.name}</b>(${targetPerson.org}) 님의 <b>[${sectionName}]</b> 항목입니다.\n`;
                         if(content && content.trim()) {
-                            response += `<div class="extracted-section">${escapeHTML(content.replace(/^#+\s+.*?\n/, '').trim())}</div>`;
+                            let cleanContent = content.replace(/^#+\s+.*?\n/, '').replace(/\n+/g, '\n').trim();
+                            response += `<div class="extracted-section">${escapeHTML(cleanContent)}</div>`;
                         } else {
                             response += `\n\n해당 항목의 내용이 비어있거나 작성되지 않았습니다.`;
                         }
@@ -401,7 +402,8 @@
                         
                         sections.forEach(sec => {
                             if(targetPerson.tags[sec.id] && targetPerson.tags[sec.id].trim()) {
-                                response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').trim())}</div>`;
+                                let cleanContent = targetPerson.tags[sec.id].replace(/^#+\s+.*?\n/, '').replace(/\n+/g, '\n').trim();
+                                response += `\n<b>📌 ${sec.name}</b>\n<div class="extracted-section">${escapeHTML(cleanContent)}</div>`;
                             }
                         });
                         addMessage(response, false, true);
