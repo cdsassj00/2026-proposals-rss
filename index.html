@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 AI·데이터 분석 전문인재 과제기획서</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .blob-1 {
+            top: -10%; left: -10%;
+            width: 50vw; height: 50vw;
+            background: rgba(99, 102, 241, 0.3);
+        }
+        .blob-2 {
+            bottom: -10%; right: -10%;
+            width: 40vw; height: 40vw;
+            background: rgba(168, 85, 247, 0.2);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        header {
+            width: 100%;
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px var(--primary-glow);
+        }
+
+        p.subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .rss-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            border-radius: 20px;
+            color: #fdba74;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .rss-badge:hover {
+            background: rgba(249, 115, 22, 0.2);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+            transform: translateY(-2px);
+        }
+
+        main {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px var(--primary-glow);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-org {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 1rem;
+            line-height: 1.4;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-footer {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-view {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .card:hover .btn-view {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            padding: 4rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <header>
+        <h1>2026 전문인재 양성과정</h1>
+        <p class="subtitle">최종 선정자 48인의 자기소개서 및 실전 AX 과제기획서<br>(개인정보 비공개 처리 완료)</p>
+        <a href="./rss.xml" class="rss-badge" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            RSS Feed 구독
+        </a>
+    </header>
+
+    <main>
+        <div id="loading" class="loading">데이터를 불러오는 중입니다...</div>
+        <div id="grid" class="grid"></div>
+    </main>
+
+    <script>
+        async function fetchRSS() {
+            try {
+                const response = await fetch('./rss.xml');
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                const grid = document.getElementById('grid');
+                const loading = document.getElementById('loading');
+                
+                loading.style.display = 'none';
+                
+                items.forEach((item, index) => {
+                    const title = item.querySelector('title').textContent;
+                    const link = item.querySelector('link').textContent;
+                    const desc = item.querySelector('description').textContent;
+                    
+                    // Parse "[소속] 이름 - ..."
+                    const match = title.match(/\[(.*?)\] (.*?) -/);
+                    const org = match ? match[1] : '소속 미상';
+                    const name = match ? match[2] : '이름 미상';
+                    
+                    // Clean up description (extract just the first bit, strip MD)
+                    let cleanDesc = desc.replace(/#/g, '').replace(/\*\*/g, '').replace(/---/g, '').trim();
+                    cleanDesc = cleanDesc.substring(cleanDesc.indexOf('소속: ') + 10);
+                    cleanDesc = cleanDesc.substring(0, 150) + '...';
+
+                    const card = document.createElement('a');
+                    card.href = link;
+                    card.target = '_blank';
+                    card.className = 'card';
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    card.style.animation = 'fadeInUp 0.6s ease forwards';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    
+                    card.innerHTML = `
+                        <div class="card-org">${org}</div>
+                        <h2 class="card-title">${name}</h2>
+                        <div class="card-desc">${cleanDesc}</div>
+                        <div class="card-footer">
+                            <span class="btn-view">기획서 보기 →</span>
+                        </div>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error fetching RSS:', error);
+                document.getElementById('loading').innerHTML = '데이터를 불러오는데 실패했습니다.<br>로컬 환경인 경우 브라우저 보안 정책(CORS) 때문일 수 있습니다.';
+            }
+        }
+
+        // Add keyframes for staggered animation
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.addEventListener('DOMContentLoaded', fetchRSS);
+    </script>
+</body>
+</html>
